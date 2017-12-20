@@ -1,0 +1,54 @@
+Chapter3: Testing Results
+    table and pictures: see the xlsx(to be done by zzh) and pngs
+    We have thirty input cases all together, and they can be divided into three different parts. Each part has ten cases and the input sizes of each part vary from 1000 to 10000
+    ALl the cases consist of input size, numbers to be inserted and numbers to be deleted in a certain order. 
+    The firt part is increasing order cases. In this part all the cases are in an increasing order, from 0 to the size of input, which are created to test the performance, that is, the cost of time for deletion and insertion operations,  of three kind of trees when the input is in increasing order. We expect the result is that splay tree has the best performance and the unbalanced tree has the worst performance, and the time cost is proportional to nlogn(n for size of input). And so they are.
+    The second part and the third part have no difference with the first one except that their orders are decreasing and random, respectly.
+
+Chapter4: Analysis and Comments
+    time complexities:
+        avl tree:
+            the insertion routine for avl tree follow the same process as inserting into a Binary Search Tree. When the node is inserted, avl tree should check whether the node's ancestors are still avl trees. Once the Balance Factor(BF) is changed to 2 or -2, then a single rotation or double rotation will be execute to keep the tree is balanced. The time for lookup is O(log n), and the check of ancestors, which is the way back to the root, cost O(log n) at most. The rotation takes O(1) each time. So the insertion can be completed in O(log n) time.
+            the delete operation always try to find the max in the left and then subsitute the deleted node with the it. Then check all the ancestors of the max of the left subtree for possible rotation. If there is no left substree, then find the min of the right subtree, the rest same. The find process costs O(logn) and the check with roration costs O(logn), for the height is logn, so the delete operation costs O(logn) time.
+        splay tree:
+            the first step for splay tree insertion is the same as the insertion a normal binary search tree. Then a splay is performed. The new root will be the inserted one, as a result. Since the height of splay tree is uncertain, varying from log(n) to n, (n is the number of nodes), the cost of insertion for splay tree is uncertain. The delete first find the node that to be deleted and do a splay to make it a root. Then find the max of the left subtree of new root(if there exist a left subtree) and splay the left substree to make the max of left the root of the left subtree. Next delete the new root, and make the right subtree be the left subtree's root's right subtree. For the same reason with the insertion, the cost of deletion can not be determined. 
+            However, a amortized analysis of splay tree can be carried out using the potential method. Define:
+            S(r) = the number of nodes in the sub-tree rooted at node r (including r).
+            rank(r) = log2(size(r)).
+            Φ(T) = Σrank(all nodes) = the sum of the ranks of all the nodes in the tree.
+            So we first caculate the ΔΦ: the change in the potential caused by a splay operation. There is three case, zig, zig-zag, zig-zig. We discuss them seperately. Denote by rank′ the rank function after the operation. x(the splayed node0, p(the parent of x) and g(the parent of p) are the nodes affected by the rotation operation.
+            Zig:
+                ΔΦ = rank′(p) − rank(p) + rank′(x) − rank(x)  [since only p and x change ranks]
+                = rank′(p) − rank(x)  [since rank′(x)=rank(p)]
+                ≤ rank′(x) − rank(x)   [since rank′(p)<rank′(x)]
+            Zig-Zig step:
+                ΔΦ = rank′(g) − rank(g) + rank′(p) − rank(p) + rank′(x) − rank(x)
+                   = rank′(g) + rank′(p) − rank(p) − rank(x)     [since rank′(x)=rank(g)]
+                   ≤ rank′(g) + rank′(x) − 2 rank(x)        [since rank(x)<rank(p) and rank′(x)>rank′(p)]
+                   ≤ 3(rank′(x)−rank(x)) − 2         [due to the concavity of the log function]
+            Zig-Zag step:
+                ΔΦ = rank′(g) − rank(g) + rank′(p) − rank(p) + rank′(x) − rank(x)
+                   ≤ rank′(g) + rank′(p) − 2 rank(x)      [since rank′(x)=rank(g) and rank(x)<rank(p)]
+                   ≤ 2(rank′(x)−rank(x)) − 2         [due to the concavity of the log function]
+            The amortized cost of any operation is ΔΦ plus the actual cost. The actual cost of any zig-zig or zig-zag operation is no bigger than 2 since there are almost two rotations to make. amortized-cost=cost+ΔΦ<=3(rank'(x)-rank'(x))
+            When add all the x together, we got that amortized-cost=cost+ΔΦ=3(rank(root)-rank(x)), which is log(n).
+            so the amortized-cost for a splay that bring a node to the root is O(logn). thus the amortized-cost for insertion and deletion
+        unbalanced tree:
+            the insertion for unbalanced tree is to find the proper position. Every time go left if smaller than the node or go right otherwise. Depending on the input, the operation costs O(log(n)) to O(n). The worst case is that the input is increasing or decreasing. The best case is that the input always keep the tree to be a balanced tree.
+            the delete is similar to the insertion, cost from O(log(n)) to O(n).
+
+
+        space complexities:
+            avl tree:
+                each node cost O(1) space, so n nodes cost O(n) space. The recursion in insertion or deletion cost at most O(logn) for the height of avl tree is O(logn). So the space complexity is O(n).
+            
+            splay tree:
+                 each node cost O(1) space, so n nodes cost O(n) space. The recursion cost at insertion or deletion most O(n) for the height of splay tree is O(n). So the space complexity is O(n).
+
+            unbalanced tree:
+                 each node cost O(1) space, so n nodes cost O(n) space. The recursion cost at deletion most O(n) for the height of ubalanced tree is O(n). So the space complexity is O(n).
+        
+        comments:
+            from the tests results we can see that in random order the unbalanced tree performs best, for it doesn't have any balanced operations and can still be relatively balanced for the input is random. However, when the input is increasing and decreasing the splay tree and avl tree works fine, having little difference with the performance when the input is random, while the performance of unbalanced is terrible. From the test result we can draw a conclusion that generally the ubalanced tree works fine for random input while avl tree and splay tree have excellent performance guarantees for different kinds of inputs.
+
+
